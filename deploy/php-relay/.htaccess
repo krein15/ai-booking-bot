@@ -1,0 +1,6 @@
+# Посредник ИИ-бота: красивые адреса api/... → relay.php?route=...
+Options -Indexes
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteRule ^api/(config|chat|result|bookings/recent|worker/pull|worker/reply|worker/state)$ relay.php?route=$1 [L,QSA]
+</IfModule>

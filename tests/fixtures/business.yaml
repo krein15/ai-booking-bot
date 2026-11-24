@@ -1,0 +1,99 @@
+# Стабильный бизнес для тестов: не меняется вместе с демо-конфигом.
+business:
+  name: "Автосервис «Демо Мотор»"
+  niche: "автосервис"
+  city: "Екатеринбург"
+  address: "ул. Демонстрационная, 1"
+  phone: "+7 (900) 000-00-00"
+  timezone: "Asia/Yekaterinburg"
+  about: "Тестовый автосервис на 2 подъёмника."
+
+assistant:
+  name: "Ева"
+  gender: "female"
+  greeting: "Здравствуйте! Я Ева. Что случилось с машиной?"
+  quick_replies:
+    - "Хочу поменять масло"
+    - "Стучит подвеска"
+  demo_note: "Это демо-версия: имя и телефон можно указать вымышленные."
+
+booking:
+  slot_minutes: 30
+  posts: 2
+  horizon_days: 14
+  min_lead_minutes: 60
+  demo_busy_ratio: 0.4
+  max_bookings_per_session: 3
+
+working_hours:
+  mon: "09:00-20:00"
+  tue: "09:00-20:00"
+  wed: "09:00-20:00"
+  thu: "09:00-20:00"
+  fri: "09:00-20:00"
+  sat: "10:00-18:00"
+  sun: null
+
+services:
+  - id: oil
+    name: "Замена масла и фильтров (ТО)"
+    duration_min: 60
+    price_from: 2500
+    parts: engine_oil
+  - id: timing_belt
+    name: "Замена ремня ГРМ с роликами"
+    duration_min: 180
+    price_from: 7000
+  - id: brakes
+    name: "Замена тормозных колодок (одна ось)"
+    duration_min: 60
+    price_from: 1500
+    parts: brake_pads
+  - id: suspension_diag
+    name: "Диагностика подвески"
+    duration_min: 30
+    price_from: 800
+  - id: computer_diag
+    name: "Компьютерная диагностика"
+    duration_min: 30
+    price_from: 1000
+
+parts:
+  engine_oil:
+    name: "Масло и фильтр"
+    options:
+      - {id: economy, name: "Полусинтетика", price_from: 2000}
+      - {id: optimum, name: "Синтетика Shell", price_from: 3500, note: "самый частый выбор"}
+      - {id: premium, name: "Оригинал", price_from: 5000}
+  brake_pads:
+    name: "Колодки на ось"
+    options:
+      - {id: economy, name: "Marshall", price_from: 1400}
+      - {id: optimum, name: "TRW", price_from: 2900}
+      - {id: premium, name: "Оригинал", price_from: 4800}
+
+symptom_guide:
+  brakes:
+    title: "Тормоза"
+    items:
+      - signs: ["горит красный индикатор тормозов", "педаль проваливается"]
+        causes: ["утечка тормозной жидкости", "воздух в системе"]
+        danger: "Ехать своим ходом опасно."
+        ask: ["Есть ли следы жидкости у колёс?"]
+        services: [computer_diag, brakes]
+  suspension:
+    title: "Подвеска"
+    items:
+      - signs: ["стук спереди на неровностях"]
+        causes: ["стойки стабилизатора"]
+        services: [suspension_diag]
+
+extra_fields:
+  - id: car
+    label: "Автомобиль"
+    description: "Марка, модель и год"
+    required: true
+
+faq:
+  - q: "Можно подождать?"
+    a: "Да."

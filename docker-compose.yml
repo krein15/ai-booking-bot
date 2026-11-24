@@ -1,0 +1,49 @@
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # пути внутри контейнера важнее значений из .env
+      GIGACHAT_CA_BUNDLE_FILE: /app/certs/russian_trusted_ca.pem
+      DATABASE_PATH: /app/data/bot.db
+    ports:
+      # наружу не открываем: доступ только через Caddy или nginx на этом же сервере
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - botdata:/app/data
+      - ./config:/app/config:ro
+      - ./secrets:/app/secrets:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # HTTPS для виджета на сайте. Включается так: docker compose --profile https up -d
+  # Нужны запись DNS (BOT_DOMAIN → IP сервера) и свободный порт 80 для получения сертификата.
+  caddy:
+    image: caddy:2.8
+    profiles: ["https"]
+    restart: unless-stopped
+    depends_on: [bot]
+    environment:
+      BOT_DOMAIN: ${BOT_DOMAIN:-bot.example.ru}
+      BOT_HTTPS_PORT: ${BOT_HTTPS_PORT:-443}
+    ports:
+      - "80:80"
+      - "${BOT_HTTPS_PORT:-443}:${BOT_HTTPS_PORT:-443}"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  botdata:
+  caddydata:
+  caddyconfig:

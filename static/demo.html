@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ИИ-администратор: демо</title>
+  <meta name="description" content="Живое демо ИИ-бота, который записывает клиентов и передаёт записи в Google Таблицу.">
+  <style>
+    :root {
+      --bg: #f6f7fb; --card: #ffffff; --text: #1b1f27; --muted: #667085; --border: #e3e7ef;
+      --accent: #2f6df6; --ok: #12805c; --ok-bg: #e8f6ef; --fresh: #fff7d6; --chip: #f3f5f9;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f1218; --card: #161a22; --text: #e8ebf2; --muted: #98a2b3; --border: #2e3546;
+        --accent: #6b97ff; --ok: #4ad295; --ok-bg: #163327; --fresh: #3a3317; --chip: #222836;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg: #0f1218; --card: #161a22; --text: #e8ebf2; --muted: #98a2b3; --border: #2e3546;
+      --accent: #6b97ff; --ok: #4ad295; --ok-bg: #163327; --fresh: #3a3317; --chip: #222836;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 28px 16px 48px; }
+    h1 { font-size: clamp(22px, 3.2vw, 32px); line-height: 1.2; margin: 0 0 8px; letter-spacing: -0.01em; }
+    .lead { color: var(--muted); max-width: 760px; margin: 0; }
+    .grid { display: grid; grid-template-columns: minmax(0, 400px) minmax(0, 1fr); gap: 20px; margin-top: 24px; align-items: start; }
+    @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+    #chat { height: 660px; }
+    @media (max-width: 900px) { #chat { height: 560px; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; min-width: 0; }
+    .card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    h2 { font-size: 18px; margin: 0; }
+    h3 { font-size: 15px; margin: 22px 0 8px; }
+    .muted { color: var(--muted); font-size: 13px; margin: 4px 0 14px; }
+    .sheet-link { color: var(--accent); font-weight: 500; text-decoration: none; white-space: nowrap; margin-left: 12px; }
+    .sheet-link:hover { text-decoration: underline; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; }
+    table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+    th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    th { font-weight: 600; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; background: var(--chip); }
+    tr:last-child td { border-bottom: 0; }
+    td.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+    tr.fresh td { background: var(--fresh); transition: background 2s; }
+    td .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .synced { color: var(--ok); white-space: nowrap; }
+    .pending { color: var(--muted); white-space: nowrap; }
+    .empty { color: var(--muted); padding: 18px 10px; text-align: center; }
+    .tips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tip { border: 1px solid var(--border); background: var(--card); color: var(--text); border-radius: 16px; padding: 7px 12px; font: inherit; font-size: 13.5px; cursor: pointer; text-align: left; }
+    .tip:hover { border-color: var(--accent); color: var(--accent); }
+    .tip:focus-visible, .sheet-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    iframe { width: 100%; height: 420px; border: 1px solid var(--border); border-radius: 12px; margin-top: 16px; background: #fff; }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>ИИ-администратор записи: живое демо</h1>
+    <p class="lead">
+      Напишите в чат как обычный клиент автосервиса. Бот подберёт услугу, найдёт свободное время
+      и запишет вас, а запись сразу появится в таблице справа и в Google Таблице.
+    </p>
+
+    <div class="grid">
+      <div id="chat"></div>
+
+      <section class="card" aria-labelledby="bookings-title">
+        <div class="card-head">
+          <h2 id="bookings-title">Записи из чата</h2>
+          <span>
+            <a id="tg-link" class="sheet-link" href="#" target="_blank" rel="noopener" hidden>Бот в Telegram ↗</a>
+            <a id="sheet-link" class="sheet-link" href="#" target="_blank" rel="noopener" hidden>Google Таблица ↗</a>
+          </span>
+        </div>
+        <p class="muted">Последние 15 записей всех посетителей демо. Имена и телефоны скрыты маской.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr id="head-row">
+                <th>№</th><th>Услуга</th><th>Визит</th><th>Клиент</th><th>Телефон</th><th>Суть обращения</th><th>Google</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr><td class="empty" colspan="7">Загружаю…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <iframe id="sheet-frame" title="Google Таблица с записями" loading="lazy" hidden></iframe>
+
+        <h3>Что попробовать</h3>
+        <div class="tips">
+          <button class="tip" type="button">Стучит спереди справа на кочках, можно в субботу утром?</button>
+          <button class="tip" type="button">Нужно поменять масло, Kia Rio 2017, завтра после 18</button>
+          <button class="tip" type="button">Горит чек, машина троит. Когда ближайшее время?</button>
+          <button class="tip" type="button">Сколько стоит замена ГРМ и сколько это по времени?</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/widget.js" data-target="#chat"></script>
+  <script>
+    (function () {
+      var rows = document.getElementById("rows");
+      var headRow = document.getElementById("head-row");
+      var sheetLink = document.getElementById("sheet-link");
+      var frame = document.getElementById("sheet-frame");
+      var known = null;
+      var extraLabels = [];
+
+      document.querySelectorAll(".tip").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          if (window.AIBookingWidget) window.AIBookingWidget.send(btn.textContent);
+        });
+      });
+
+      fetch("/api/config").then(function (r) { return r.json(); }).then(function (cfg) {
+        if (cfg.sheet_url) {
+          sheetLink.href = cfg.sheet_url;
+          sheetLink.hidden = false;
+        }
+        if (cfg.telegram_url) {
+          var tg = document.getElementById("tg-link");
+          tg.href = cfg.telegram_url;
+          tg.hidden = false;
+        }
+        if (cfg.sheet_embed_url) {
+          frame.src = cfg.sheet_embed_url;
+          frame.hidden = false;
+        }
+      }).catch(function () {});
+
+      function cell(text, cls) {
+        var td = document.createElement("td");
+        td.textContent = text == null ? "" : String(text);
+        if (cls) td.className = cls;
+        return td;
+      }
+
+      function ensureExtraColumns(items) {
+        if (extraLabels.length || !items.length) return;
+        extraLabels = Object.keys(items[0].extra || {});
+        var anchor = headRow.children[5];
+        extraLabels.forEach(function (label) {
+          var th = document.createElement("th");
+          th.textContent = label;
+          headRow.insertBefore(th, anchor);
+        });
+      }
+
+      function render(items) {
+        ensureExtraColumns(items);
+        var columns = 7 + extraLabels.length;
+        rows.innerHTML = "";
+        if (!items.length) {
+          var tr = document.createElement("tr");
+          var td = cell("Пока записей нет — попробуйте записаться в чате.", "empty");
+          td.colSpan = columns;
+          tr.appendChild(td);
+          rows.appendChild(tr);
+          return;
+        }
+        var ids = {};
+        items.forEach(function (b) {
+          ids[b.number] = true;
+          var tr = document.createElement("tr");
+          if (known && !known[b.number]) tr.className = "fresh";
+          tr.appendChild(cell(b.number, "num"));
+          var service = cell(b.service);
+          if (b.parts) {
+            var parts = document.createElement("div");
+            parts.className = "sub";
+            parts.textContent = b.parts + " · от " + String(b.total_from).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " ₽";
+            service.appendChild(parts);
+          }
+          tr.appendChild(service);
+          tr.appendChild(cell(b.visit));
+          tr.appendChild(cell(b.client));
+          tr.appendChild(cell(b.phone, "num"));
+          extraLabels.forEach(function (label) { tr.appendChild(cell((b.extra || {})[label])); });
+          tr.appendChild(cell(b.summary));
+          tr.appendChild(cell(b.in_sheet ? "✓ выгружена" : "в очереди", b.in_sheet ? "synced" : "pending"));
+          rows.appendChild(tr);
+        });
+        known = ids;
+      }
+
+      function refresh() {
+        return fetch("/api/bookings/recent").then(function (r) { return r.json(); }).then(function (d) {
+          render(d.items || []);
+        }).catch(function () {});
+      }
+
+      window.addEventListener("ai-booking:created", function () {
+        refresh();
+        setTimeout(refresh, 3000);
+        if (!frame.hidden) setTimeout(function () { frame.src = frame.src; }, 4000);
+      });
+      refresh();
+      setInterval(refresh, 8000);
+    })();
+  </script>
+</body>
+</html>

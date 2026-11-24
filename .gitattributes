@@ -1,0 +1,7 @@
+# Проект выкладывается на Linux (scripts/deploy_user.sh берёт файлы из рабочей копии),
+# поэтому окончания строк всегда LF — иначе .sh и .service ломаются на сервере.
+* text=auto eol=lf
+*.png binary
+*.ttf binary
+*.xlsx binary
+*.gif binary

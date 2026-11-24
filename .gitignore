@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+secrets/
+certs/
+data/
+build/
+.deploy.env
+.claude/
+review/
+deploy/php-relay/_data/config.php

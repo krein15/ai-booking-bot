@@ -1,0 +1,7 @@
+# HTTPS для виджета на сайте. Caddy сам получает и продлевает сертификат Let's Encrypt
+# (проверка через порт 80). Порт 443 на сервере занят VPN, поэтому бот отвечает на 8444:
+#   https://bot.kreinstudio.ru:8444/widget.js
+{$BOT_DOMAIN}:{$BOT_HTTPS_PORT} {
+	encode gzip
+	reverse_proxy bot:8000
+}

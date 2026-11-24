@@ -1,0 +1,18 @@
+# Пользовательская служба systemd (без root): ~/.config/systemd/user/booking-bot.service
+# Перезапускает бота при падении и поднимает после перезагрузки сервера (нужен linger:
+# loginctl enable-linger <пользователь>). Логи — ~/booking-bot/data/bot.log
+[Unit]
+Description=AI booking demo bot (GigaChat, Telegram)
+After=network-online.target
+
+[Service]
+WorkingDirectory=%h/booking-bot
+ExecStart=%h/booking-bot/.venv/bin/uvicorn app.main:create_app --factory --host 127.0.0.1 --port 8000
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=append:%h/booking-bot/data/bot.log
+StandardError=append:%h/booking-bot/data/bot.log
+
+[Install]
+WantedBy=default.target
