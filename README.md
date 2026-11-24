@@ -60,11 +60,9 @@
 |:---:|:---:|:---:|
 | <img src="docs/screenshots/01-diagnosis.png" width="260"><br>Сначала безопасность, потом причина | <img src="docs/screenshots/02-parts.png" width="260"><br>Эконом, оптимум, премиум — с ценами | <img src="docs/screenshots/03-booking.png" width="260"><br>Карточка записи и ссылка на таблицу |
 
-<p align="center">
-  <img src="docs/screenshots/04-site.png" width="620" alt="Чат на сайте">
-  <img src="docs/screenshots/05-site-mobile.png" width="200" alt="Чат на сайте с телефона"><br>
-  Тот же бот на сайте — чат встраивается одной строкой и подстраивается под дизайн
-</p>
+| Тот же бот на сайте | С телефона |
+|:---:|:---:|
+| <img src="docs/screenshots/04-site.png" width="560" alt="Чат на сайте"><br>Чат встраивается одной строкой и подстраивается под дизайн | <img src="docs/screenshots/05-site-mobile.png" width="190" alt="Чат на сайте с телефона"><br>Удобно и на телефоне |
 
 <p align="center"><img src="docs/screenshots/06-sheet.png" width="860" alt="Записи в Google Таблице"><br>Google Таблица: каждая запись с услугой, временем, автомобилем, запчастями, суммой и сутью обращения</p>
 
